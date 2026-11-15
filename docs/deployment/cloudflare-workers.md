@@ -1,10 +1,10 @@
 # Cloudflare Workers
 
-Cloudflare Workers hosts your site on Cloudflare's global network. Inkstead Writer publishes to it directly through the Cloudflare API, so there is no extra tooling to install. You need a Cloudflare account and two values from it, described below.
+Cloudflare Workers hosts your site on Cloudflare's global network. Sumi publishes to it directly through the Cloudflare API, so there is no extra tooling to install. You need a Cloudflare account and two values from it, described below.
 
 ## Configuration
 
-Choose Cloudflare Workers during `inkstead-writer init`, or add this to `inkstead-writer.json` later:
+Choose Cloudflare Workers during `sumi init`, or add this to `sumi.json` later:
 
 ```json
 {
@@ -31,7 +31,7 @@ For local publishing, put those values in `.env`. For automated publishing, add 
 Before the first publish, confirm the Cloudflare variables are available:
 
 ```bash
-./inkstead-writer doctor
+./sumi doctor
 ```
 
 ## Publishing
@@ -39,9 +39,9 @@ Before the first publish, confirm the Cloudflare variables are available:
 With the variables in place, publish the site:
 
 ```bash
-./inkstead-writer publish
+./sumi publish
 ```
 
-You do not need Wrangler, Cloudflare's own command line tool, installed. Inkstead Writer creates or updates the Worker named by `projectName` and publishes the configured build output to it.
+You do not need Wrangler, Cloudflare's own command line tool, installed. Sumi creates or updates the Worker named by `projectName` and publishes the configured build output to it.
 
-Pointing your own domain at the site happens in the Cloudflare dashboard, not in Inkstead Writer. The same goes for routes and workers.dev subdomains. Inkstead Writer deploys the Worker named by `projectName` and nothing else.
+Pointing your own domain at the site happens in the Cloudflare dashboard, not in Sumi. The same goes for routes and workers.dev subdomains. Sumi deploys the Worker named by `projectName` and nothing else.

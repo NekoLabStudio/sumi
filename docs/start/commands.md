@@ -1,21 +1,21 @@
 # Commands
 
-This page lists every `inkstead-writer` command in one place. Inside a site, run commands through the `./inkstead-writer` wrapper. The globally installed `inkstead-writer` is mainly for creating sites and managing cached binaries.
+This page lists every `sumi` command in one place. Inside a site, run commands through the `./sumi` wrapper. The globally installed `sumi` is mainly for creating sites and managing cached binaries.
 
 In this guide you will learn:
 
-- how the `./inkstead-writer` wrapper keeps a site on the right version
+- how the `./sumi` wrapper keeps a site on the right version
 - which commands you use while writing and previewing
 - which commands build, publish and check a site
 - which commands manage themes, updates and the binary cache
 
-## The `./inkstead-writer` wrapper
+## The `./sumi` wrapper
 
-Every site has a small script called `inkstead-writer` at its root, created by `init`. Running `./inkstead-writer` uses it instead of the global binary.
+Every site has a small script called `sumi` at its root, created by `init`. Running `./sumi` uses it instead of the global binary.
 
-The wrapper reads the version recorded in `inkstead-writer.json` and runs exactly that Inkstead Writer release. If that release is not on your machine yet, the wrapper downloads it, verifies its checksum and caches it, so the first run needs a network connection and later runs do not. The same site therefore behaves the same everywhere: on your machine, on another computer and in CI.
+The wrapper reads the version recorded in `sumi.json` and runs exactly that Sumi release. If that release is not on your machine yet, the wrapper downloads it, verifies its checksum and caches it, so the first run needs a network connection and later runs do not. The same site therefore behaves the same everywhere: on your machine, on another computer and in CI.
 
-The wrapper works from anywhere inside the site and runs commands from the site root. The bare `inkstead-writer` command is only needed before a site exists, for installing and for `inkstead-writer init`.
+The wrapper works from anywhere inside the site and runs commands from the site root. The bare `sumi` command is only needed before a site exists, for installing and for `sumi init`.
 
 ## Writing
 
@@ -48,15 +48,15 @@ See [Deployment](../deployment/index.md) and [Syndication](../syndication/index.
 
 `doctor` looks at everything a publish depends on:
 
-- `inkstead-writer.json` is present and the site configuration loads
+- `sumi.json` is present and the site configuration loads
 - the posts, pages and media folders exist
 - `.env` is present, and every environment variable your publishing target and syndication providers need is set
 - publishing target settings, such as the Cloudflare Worker name or the Netlify variables
-- the `./inkstead-writer` wrapper is present, executable and current
-- generated CI workflows match Inkstead Writer's current template and run the wrapper
+- the `./sumi` wrapper is present, executable and current
+- generated CI workflows match Sumi's current template and run the wrapper
 - all posts load without content errors
 
-It ends with a summary of passes, warnings and blocking issues. When it suggests `./inkstead-writer migrate`, running that brings generated files up to date.
+It ends with a summary of passes, warnings and blocking issues. When it suggests `./sumi migrate`, running that brings generated files up to date.
 
 ## Themes
 
@@ -65,19 +65,36 @@ It ends with a summary of passes, warnings and blocking issues. When it suggests
 | `theme eject` | Copies the default templates into your theme folder. `--force` overwrites existing files. |
 | `theme check` | Checks templates without building the site. |
 | `theme format` | Formats templates. `--check` reports differences without writing. |
-| `theme language-server` | Runs the Plume language server for editor integrations. |
+| `theme language-server` | Runs the Sumi language server for editor integrations. |
 
 See [Themes](themes.md) for details.
+
+## AI coding agents
+
+If you use an AI coding agent, such as Claude Code, to work on your site, you can give it Sumi's own documentation. `sumi mcp` runs a Model Context Protocol server that answers from the guides for the Sumi version your site uses and can read your `sumi.json`.
+
+| Command | What it does |
+| --- | --- |
+| `mcp` | Runs the MCP server over standard input and output. |
+
+Point your agent's MCP settings at the site's command:
+
+```json
+{
+  "command": "./sumi",
+  "args": ["mcp"]
+}
+```
 
 ## Maintenance
 
 | Command | What it does |
 | --- | --- |
-| `update` | Updates the site to the latest Inkstead Writer release, or a specific one with `--to <version>`. `--check` only reports, `--dry-run` previews the migration. |
+| `update` | Updates the site to the latest Sumi release, or a specific one with `--to <version>`. `--check` only reports, `--dry-run` previews the migration. |
 | `migrate` | Applies migrations for the version already recorded in the site. |
 | `cache list` | Lists downloaded binaries. |
 | `cache clean` | Prunes downloaded binaries. `--dry-run` previews. |
-| `version` | Prints the Inkstead Writer version. |
+| `version` | Prints the Sumi version. |
 
 See [Upgrading](../upgrading/index.md) for how versions and migrations fit together.
 
@@ -85,4 +102,4 @@ See [Upgrading](../upgrading/index.md) for how versions and migrations fit toget
 
 | Command | What it does |
 | --- | --- |
-| `init` | Creates a new site interactively. Run `inkstead-writer init --help` to see the non-interactive options for publishing, CI, syndication and app connection setup. |
+| `init` | Creates a new site interactively. Run `sumi init --help` to see the non-interactive options for publishing, CI, syndication and app connection setup. |

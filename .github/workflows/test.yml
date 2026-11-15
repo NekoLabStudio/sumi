@@ -32,6 +32,28 @@ jobs:
       - name: Release build
         run: swift build -c release --static-swift-stdlib
 
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check editor extension scripts
+        run: |
+          node -c editors/vscode/extension.js
+          node -c editors/nova/Sumi.novaextension/Scripts/main.js
+
+      # Fails when a page is missing from the nav or a version set can't build.
+      - name: Build docs site
+        run: |
+          python3 docs-site/build.py --output dist/docs-site
+          # The install command and every site's $schema point at these.
+          test -s dist/docs-site/install.sh
+          test -s dist/docs-site/schema/sumi.json
+
   macos:
     name: macOS
     runs-on: macos-latest
@@ -39,8 +61,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      # The runner's default Xcode Swift is older than the tools-version PlumeKit's
-      # manifest declares (6.2), so install a matching toolchain from swift.org. It's
+      # Match the Linux container's toolchain rather than the runner's default
+      # Xcode Swift, so both platforms build with the same compiler. It's
       # put on PATH only in the Swift steps below (not globally) so it doesn't shadow
       # Xcode's clang when SwiftPM builds the bundled C image libraries.
       - name: Install Swift 6.3.2
@@ -55,6 +77,11 @@ jobs:
           key: macos-test-swiftpm-${{ hashFiles('Package.resolved', 'Package.swift') }}
           restore-keys: |
             macos-test-swiftpm-
+
+      # jsdom lets the browser runtime tests run in a real DOM. Without it they
+      # skip themselves, so this only needs to happen on one platform.
+      - name: Install browser runtime test tools
+        run: npm install --prefix Tests/ClientRuntime --no-audit --no-fund
 
       - name: Test
         run: |

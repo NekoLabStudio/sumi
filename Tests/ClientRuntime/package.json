@@ -1,0 +1,9 @@
+{
+  "name": "sumi-client-runtime-tests",
+  "private": true,
+  "version": "0.0.0",
+  "description": "jsdom behavioural tests for the Sumi client runtime",
+  "type": "module",
+  "scripts": { "test": "node runtime.test.mjs" },
+  "devDependencies": { "jsdom": "^24" }
+}

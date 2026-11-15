@@ -43,8 +43,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      # The runner's default Xcode Swift is older than the tools-version PlumeKit's
-      # manifest declares (6.2), so install a matching toolchain from swift.org. It's
+      # Match the Linux container's toolchain rather than the runner's default
+      # Xcode Swift, so both platforms build with the same compiler. It's
       # put on PATH only in the Swift steps below (not globally) so it doesn't shadow
       # Xcode's clang when SwiftPM builds the bundled C image libraries.
       - name: Install Swift 6.3.2
@@ -74,12 +74,12 @@ jobs:
 
       - name: Smoke test launcher
         run: |
-          test -x support/inkstead-writer
-          if support/inkstead-writer build 2>launcher-error.txt; then
-            echo "Launcher unexpectedly succeeded outside an Inkstead Writer site."
+          test -x support/sumi
+          if support/sumi build 2>launcher-error.txt; then
+            echo "Launcher unexpectedly succeeded outside a Sumi site."
             exit 1
           fi
-          grep -q "not inside an Inkstead Writer site" launcher-error.txt
+          grep -q "not inside a Sumi site" launcher-error.txt
           test -x support/install.sh
           sh -n support/install.sh
           support/install.sh --help >/dev/null
@@ -87,8 +87,8 @@ jobs:
       - name: Package launcher assets
         run: |
           mkdir -p artifact
-          cp support/inkstead-writer "artifact/inkstead-writer-${GITHUB_REF_NAME}"
-          chmod +x "artifact/inkstead-writer-${GITHUB_REF_NAME}"
+          cp support/sumi "artifact/sumi-${GITHUB_REF_NAME}"
+          chmod +x "artifact/sumi-${GITHUB_REF_NAME}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
@@ -116,11 +116,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Check tag matches Inkstead Writer version
+      - name: Check tag matches Sumi version
         run: |
-          VERSION="$(sed -n 's/.*currentVersion = "\(.*\)".*/\1/p' Sources/InksteadWriter/Config/InksteadWriterConfig.swift)"
+          VERSION="$(sed -n 's/.*currentVersion = "\(.*\)".*/\1/p' Sources/Sumi/Config/SumiConfig.swift)"
           if [ "${GITHUB_REF_NAME#v}" != "$VERSION" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match Inkstead Writer version $VERSION"
+            echo "Tag $GITHUB_REF_NAME does not match Sumi version $VERSION"
             exit 1
           fi
 
@@ -130,23 +130,23 @@ jobs:
       - name: Package
         run: |
           mkdir -p artifact
-          cp .build/release/inkstead-writer artifact/inkstead-writer
+          cp .build/release/sumi artifact/sumi
           cp LICENSE.txt artifact/LICENSE.txt
-          tar -C artifact -czf inkstead-writer-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}.tar.gz inkstead-writer LICENSE.txt
+          tar -C artifact -czf sumi-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}.tar.gz sumi LICENSE.txt
 
       - name: Smoke test archive
         run: |
           mkdir -p smoke
-          tar -xzf inkstead-writer-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}.tar.gz -C smoke
-          test -x smoke/inkstead-writer
+          tar -xzf sumi-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}.tar.gz -C smoke
+          test -x smoke/sumi
           test -f smoke/LICENSE.txt
-          smoke/inkstead-writer version
+          smoke/sumi version
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: linux-${{ matrix.arch }}-binary
-          path: inkstead-writer-*-linux-${{ matrix.arch }}.tar.gz
+          path: sumi-*-linux-${{ matrix.arch }}.tar.gz
 
   macos:
     name: macOS binary (${{ matrix.arch }})
@@ -166,16 +166,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Check tag matches Inkstead Writer version
+      - name: Check tag matches Sumi version
         run: |
-          VERSION="$(sed -n 's/.*currentVersion = "\(.*\)".*/\1/p' Sources/InksteadWriter/Config/InksteadWriterConfig.swift)"
+          VERSION="$(sed -n 's/.*currentVersion = "\(.*\)".*/\1/p' Sources/Sumi/Config/SumiConfig.swift)"
           if [ "${GITHUB_REF_NAME#v}" != "$VERSION" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match Inkstead Writer version $VERSION"
+            echo "Tag $GITHUB_REF_NAME does not match Sumi version $VERSION"
             exit 1
           fi
 
-      # The runner's default Xcode Swift is older than the tools-version PlumeKit's
-      # manifest declares (6.2), so install a matching toolchain from swift.org. It's
+      # Match the Linux container's toolchain rather than the runner's default
+      # Xcode Swift, so both platforms build with the same compiler. It's
       # put on PATH only in the build step below (not globally) so it doesn't shadow
       # Xcode's clang when SwiftPM builds the bundled C image libraries.
       - name: Install Swift 6.3.2
@@ -191,23 +191,107 @@ jobs:
       - name: Package
         run: |
           mkdir -p artifact
-          cp .build/release/inkstead-writer artifact/inkstead-writer
+          cp .build/release/sumi artifact/sumi
           cp LICENSE.txt artifact/LICENSE.txt
-          tar -C artifact -czf inkstead-writer-${GITHUB_REF_NAME}-macos-${{ matrix.arch }}.tar.gz inkstead-writer LICENSE.txt
+          tar -C artifact -czf sumi-${GITHUB_REF_NAME}-macos-${{ matrix.arch }}.tar.gz sumi LICENSE.txt
 
       - name: Smoke test archive
         run: |
           mkdir -p smoke
-          tar -xzf inkstead-writer-${GITHUB_REF_NAME}-macos-${{ matrix.arch }}.tar.gz -C smoke
-          test -x smoke/inkstead-writer
+          tar -xzf sumi-${GITHUB_REF_NAME}-macos-${{ matrix.arch }}.tar.gz -C smoke
+          test -x smoke/sumi
           test -f smoke/LICENSE.txt
-          smoke/inkstead-writer version
+          smoke/sumi version
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: macos-${{ matrix.arch }}-binary
-          path: inkstead-writer-*-macos-${{ matrix.arch }}.tar.gz
+          path: sumi-*-macos-${{ matrix.arch }}.tar.gz
+
+  editors:
+    name: Editor extensions
+    needs:
+      - linux-tests
+      - macos-tests
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      # The Nova build compiles the Tree-sitter grammar against Nova's own
+      # SyntaxKit and validates the bundle with Nova's CLI.
+      - name: Cache Nova download
+        uses: actions/cache@v6
+        with:
+          path: nova-download/Nova.zip
+          key: nova-app-zip-v1
+
+      - name: Install Nova
+        run: |
+          mkdir -p nova-download
+          if [ ! -f nova-download/Nova.zip ]; then
+            curl --fail -L https://download.panic.com/nova/Nova-Latest.zip -o nova-download/Nova.zip
+          fi
+          mkdir -p "$RUNNER_TEMP/nova"
+          ditto -x -k nova-download/Nova.zip "$RUNNER_TEMP/nova"
+          test -d "$RUNNER_TEMP/nova/Nova.app"
+          echo "NOVA_APP_PATH=$RUNNER_TEMP/nova/Nova.app" >> "$GITHUB_ENV"
+
+      - name: Check extension versions match tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          VSCODE_VERSION="$(node -p 'require("./editors/vscode/package.json").version')"
+          NOVA_VERSION="$(node -p 'require("./editors/nova/Sumi.novaextension/extension.json").version')"
+          if [ "$VSCODE_VERSION" != "$VERSION" ]; then
+            echo "VS Code extension version $VSCODE_VERSION does not match $GITHUB_REF_NAME"
+            exit 1
+          fi
+          if [ "$NOVA_VERSION" != "$VERSION" ]; then
+            echo "Nova extension version $NOVA_VERSION does not match $GITHUB_REF_NAME"
+            exit 1
+          fi
+
+      - name: Copy license into editor packages
+        run: |
+          cp LICENSE.txt editors/vscode/LICENSE.txt
+          cp LICENSE.txt editors/nova/Sumi.novaextension/LICENSE.txt
+
+      - name: Package VS Code extension
+        run: |
+          npm install --prefix editors/vscode
+          npm run --prefix editors/vscode package -- --out ../../sumi-vscode-${GITHUB_REF_NAME}.vsix
+
+      - name: Build Nova extension
+        run: support/build-nova-extension.sh
+
+      - name: Package Nova extension
+        run: |
+          python3 - <<'PY'
+          import os
+          import zipfile
+
+          source = "editors/nova/Sumi.novaextension"
+          output = f"sumi-nova-{os.environ['GITHUB_REF_NAME']}.zip"
+          with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
+              for root, _, files in os.walk(source):
+                  for name in files:
+                      path = os.path.join(root, name)
+                      archive.write(path, os.path.relpath(path, "editors/nova"))
+          PY
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: editor-extensions
+          path: |
+            sumi-vscode-*.vsix
+            sumi-nova-*.zip
 
   release:
     name: Publish GitHub release
@@ -215,6 +299,7 @@ jobs:
       - launcher
       - linux
       - macos
+      - editors
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -229,11 +314,11 @@ jobs:
       - name: Generate checksums
         run: |
           cd artifacts
-          sha256sum "inkstead-writer-${GITHUB_REF_NAME}" *.tar.gz > "inkstead-writer-${GITHUB_REF_NAME}-SHA256SUMS"
-          sha256sum -c "inkstead-writer-${GITHUB_REF_NAME}-SHA256SUMS"
+          sha256sum "sumi-${GITHUB_REF_NAME}" *.tar.gz *.vsix *.zip > "sumi-${GITHUB_REF_NAME}-SHA256SUMS"
+          sha256sum -c "sumi-${GITHUB_REF_NAME}-SHA256SUMS"
 
       # The release description is the version's upgrade-notes page (with doc
-      # links rewritten to inkstead.app), followed by GitHub's generated
+      # links rewritten to the docs site), followed by GitHub's generated
       # changelog. Every release has a page (an additive one rolls into an
       # automatic all-clear); the --generate-notes fallback only covers a tag
       # cut outside the prepare-release workflow.
@@ -243,12 +328,12 @@ jobs:
           PAGE="docs/upgrading/${VERSION}.md"
           if [ -f "$PAGE" ]; then
             {
-              echo "Upgrade guide: https://inkstead.app/writer/upgrading/${VERSION}/"
+              echo "Upgrade guide: https://oss.nekolab.studio/sumi/upgrading/${VERSION}/"
               echo
               # Doc links are site-absolute (the convention in docs/), so
-              # prefix them with the site origin and the /writer/ section.
+              # prefix them with the site origin and the /sumi/ section.
               awk 'NR==1 && /^# /{next} {print}' "$PAGE" \
-                | sed -E 's|\]\((/[A-Za-z0-9._/#-]*)\)|](https://inkstead.app/writer\1)|g'
+                | sed -E 's|\]\((/[A-Za-z0-9._/#-]*)\)|](https://oss.nekolab.studio/sumi\1)|g'
               echo
               echo "---"
               echo
@@ -261,9 +346,9 @@ jobs:
       - name: Create release
         run: |
           if [ -f release-notes.md ]; then
-            gh release create "$GITHUB_REF_NAME" "artifacts/inkstead-writer-${GITHUB_REF_NAME}" artifacts/*.tar.gz artifacts/*-SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --notes-file release-notes.md
+            gh release create "$GITHUB_REF_NAME" "artifacts/sumi-${GITHUB_REF_NAME}" artifacts/*.tar.gz artifacts/*.vsix artifacts/*.zip artifacts/*-SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --notes-file release-notes.md
           else
-            gh release create "$GITHUB_REF_NAME" "artifacts/inkstead-writer-${GITHUB_REF_NAME}" artifacts/*.tar.gz artifacts/*-SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes
+            gh release create "$GITHUB_REF_NAME" "artifacts/sumi-${GITHUB_REF_NAME}" artifacts/*.tar.gz artifacts/*.vsix artifacts/*.zip artifacts/*-SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes
           fi
         env:
           GH_TOKEN: ${{ github.token }}

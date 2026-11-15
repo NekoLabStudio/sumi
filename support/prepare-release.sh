@@ -3,8 +3,10 @@
 # prepare-release.sh <version>
 #
 # Performs every FILE edit a release needs, in one deterministic pass:
-#   • Sources/InksteadWriter/Config/InksteadWriterConfig.swift
+#   • Sources/Sumi/Config/SumiConfig.swift
 #       → currentVersion = "<version>"
+#   • editors/vscode/package.json and the Nova extension.json
+#       → "version": "<version>"
 #   • docs/upgrading/next.md → docs/upgrading/<version>.md
 #     (retitled, unreleased-intro block dropped, fresh next.md started,
 #      index.md version list updated). A next.md still at its "Nothing yet."
@@ -24,18 +26,32 @@ if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
   exit 1
 fi
 
-CONFIG="Sources/InksteadWriter/Config/InksteadWriterConfig.swift"
+CONFIG="Sources/Sumi/Config/SumiConfig.swift"
 CURRENT="$(sed -n 's/.*currentVersion = "\(.*\)".*/\1/p' "$CONFIG")"
 if [ "$CURRENT" = "$VERSION" ]; then
   echo "currentVersion is already $VERSION — nothing to do?" >&2
   exit 1
 fi
 
-# 1. The version (drives `inkstead-writer version`, self-update, and the
+# 1. The version (drives `sumi version`, self-update, and the
 #    per-site launcher pin; release.yml refuses a tag that doesn't match it).
 sed -i.bak "s/currentVersion = \"$CURRENT\"/currentVersion = \"$VERSION\"/" "$CONFIG"
 rm "$CONFIG.bak"
 grep -q "currentVersion = \"$VERSION\"" "$CONFIG"
+
+# Editor extensions track the Sumi version (release.yml enforces it).
+# A plain substitution, guarded to exactly one "version" key per manifest,
+# because GNU sed's first-match-only address form doesn't exist on BSD sed.
+for manifest in editors/vscode/package.json editors/nova/Sumi.novaextension/extension.json; do
+  occurrences="$(grep -c '"version":' "$manifest")"
+  if [ "$occurrences" != "1" ]; then
+    echo "$manifest has $occurrences \"version\" keys, expected exactly 1" >&2
+    exit 1
+  fi
+  sed -i.bak "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" "$manifest"
+  rm "$manifest.bak"
+  grep -q "\"version\": \"$VERSION\"" "$manifest"
+done
 
 # 2. Roll the upgrade notes.
 NEXT="docs/upgrading/next.md"
@@ -56,16 +72,16 @@ BODY="$(sed -e '1d' -e '/<!-- unreleased-intro-start/,/<!-- unreleased-intro-end
         | grep -v '^$' || true)"
 if [ "$BODY" = "Nothing yet." ]; then
   cat > "$PAGE" <<ALLCLEAR
-# Inkstead Writer $VERSION
+# Sumi $VERSION
 
-Nothing needs changing in your site: update Inkstead Writer and rebuild.
+Nothing needs changing in your site: update Sumi and rebuild.
 ALLCLEAR
 else
-  sed -e "1s/^# Unreleased$/# Inkstead Writer $VERSION/" \
+  sed -e "1s/^# Unreleased$/# Sumi $VERSION/" \
       -e '/<!-- unreleased-intro-start/,/<!-- unreleased-intro-end -->/d' \
       "$NEXT" > "$PAGE"
 fi
-grep -q "^# Inkstead Writer $VERSION$" "$PAGE"
+grep -q "^# Sumi $VERSION$" "$PAGE"
 
 cat > "$NEXT" <<'TEMPLATE'
 # Unreleased
@@ -81,11 +97,13 @@ TEMPLATE
 # The version list in the section index, newest first (under the marker).
 # Site-absolute link, the convention throughout docs/.
 sed -i.bak "/<!-- newest-first/a\\
-- [Inkstead Writer $VERSION](/upgrading/$VERSION/)
+- [Sumi $VERSION](/upgrading/$VERSION/)
 " docs/upgrading/index.md
 rm docs/upgrading/index.md.bak
 grep -q "(/upgrading/$VERSION/)" docs/upgrading/index.md
 
 echo "Prepared release $VERSION (was $CURRENT):"
 echo "  $CONFIG"
+echo "  editors/vscode/package.json"
+echo "  editors/nova/Sumi.novaextension/extension.json"
 echo "  docs/upgrading/$VERSION.md (from next.md, fresh next.md started)"
