@@ -1,0 +1,24 @@
+{
+  "ci" : {
+    "provider" : "github-actions"
+  },
+  "content" : {
+    "collections" : "content\/collections",
+    "media" : "content\/media",
+    "pages" : "content\/pages",
+    "posts" : "content\/posts"
+  },
+  "deploy" : {
+    "provider" : "github-pages"
+  },
+  "theme" : {
+    "showPoweredBy" : false
+  },
+  "site" : {
+    "author" : "Your Name",
+    "description" : "Notes, photos, and longer writing.",
+    "title" : "My Website",
+    "url" : "https:\/\/example.com"
+  },
+  "version" : "2.3.1"
+}

@@ -1,8 +1,8 @@
 # Flickr
 
-Inkstead Writer can upload your photo notes to Flickr. Flickr needs the most setup of the supported services, but it is a one-time job: four values, created once, that never expire.
+Sumi can upload your photo notes to Flickr. Flickr needs the most setup of the supported services, but it is a one-time job: four values, created once, that never expire.
 
-Inkstead Writer reads four environment variables:
+Sumi reads four environment variables:
 
 | Variable | What it is |
 | --- | --- |

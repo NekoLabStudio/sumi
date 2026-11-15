@@ -1,0 +1,98 @@
+{
+  "name": "sumi",
+  "displayName": "Sumi",
+  "description": "Sumi template language support, plus Sumi site commands (dev, build, deploy, migrate, doctor).",
+  "version": "2.3.2",
+  "publisher": "nekolabstudio",
+  "license": "MIT",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NekoLabStudio/sumi"
+  },
+  "bugs": {
+    "url": "https://github.com/NekoLabStudio/sumi/issues"
+  },
+  "homepage": "https://oss.nekolab.studio/sumi",
+  "keywords": [
+    "sumi",
+    "templates",
+    "html",
+    "static-site"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters"
+  ],
+  "activationEvents": [
+    "onLanguage:sumi",
+    "workspaceContains:sumi.json"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sumi.restartLanguageServer",
+        "title": "Sumi: Restart Language Server"
+      },
+      {
+        "command": "sumi.checkTheme",
+        "title": "Sumi: Check Templates"
+      },
+      { "command": "sumi.dev", "title": "Sumi: Dev Server" },
+      { "command": "sumi.build", "title": "Sumi: Build" },
+      { "command": "sumi.deploy", "title": "Sumi: Deploy" },
+      { "command": "sumi.migrate", "title": "Sumi: Migrate" },
+      { "command": "sumi.doctor", "title": "Sumi: Doctor" }
+    ],
+    "configuration": {
+      "title": "Sumi",
+      "properties": {
+        "sumi.toolPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the sumi command. Leave empty to prefer ./sumi in the workspace, then sumi on PATH."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "sumi",
+        "aliases": [
+          "Sumi"
+        ],
+        "extensions": [
+          ".sumi"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sumi",
+        "scopeName": "text.html.sumi",
+        "path": "./syntaxes/sumi.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "sumi",
+        "path": "./snippets/sumi.json"
+      }
+    ]
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^2.15.0",
+    "@types/vscode": "^1.85.0"
+  },
+  "scripts": {
+    "check": "node -c extension.js",
+    "package": "vsce package"
+  }
+}

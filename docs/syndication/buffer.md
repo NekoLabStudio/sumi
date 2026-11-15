@@ -1,8 +1,8 @@
 # Buffer
 
-Buffer is a service that publishes to several social networks from one account. Connecting it to Inkstead Writer once reaches X, LinkedIn, Threads, Facebook, Instagram and Pinterest, without a separate developer account for each.
+Buffer is a service that publishes to several social networks from one account. Connecting it to Sumi once reaches X, LinkedIn, Threads, Facebook, Instagram and Pinterest, without a separate developer account for each.
 
-Mastodon, Bluesky, Pixelfed and Flickr are not offered through Buffer. Inkstead Writer publishes to those directly, and going through Buffer as well would post twice.
+Mastodon, Bluesky, Pixelfed and Flickr are not offered through Buffer. Sumi publishes to those directly, and going through Buffer as well would post twice.
 
 ## Getting a key
 
@@ -34,7 +34,7 @@ If one Buffer organisation holds more than one account on the same network, name
 }
 ```
 
-Without an account, a target posts to every channel on that network. If a target matches nothing, Inkstead Writer records the failure and moves on; it never falls back to a different channel.
+Without an account, a target posts to every channel on that network. If a target matches nothing, Sumi records the failure and moves on; it never falls back to a different channel.
 
 Posts opt in the same way as any other target:
 

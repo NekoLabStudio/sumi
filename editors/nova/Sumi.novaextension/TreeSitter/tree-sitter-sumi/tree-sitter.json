@@ -1,0 +1,36 @@
+{
+  "grammars": [
+    {
+      "name": "sumi",
+      "camelcase": "Sumi",
+      "scope": "source.sumi",
+      "file-types": [
+        "sumi"
+      ],
+      "highlights": "queries/highlights.scm"
+    }
+  ],
+  "metadata": {
+    "version": "1.1.0",
+    "license": "MIT",
+    "description": "Sumi template grammar for Nova syntax highlighting",
+    "authors": [
+      {
+        "name": "Ivo Nunes"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/NekoLabStudio/sumi"
+    }
+  },
+  "bindings": {
+    "c": false,
+    "go": false,
+    "java": false,
+    "node": false,
+    "python": false,
+    "rust": false,
+    "swift": false,
+    "zig": false
+  }
+}

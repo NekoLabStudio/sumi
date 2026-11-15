@@ -1,0 +1,54 @@
+{
+  "identifier": "studio.nekolab.sumi",
+  "name": "Sumi",
+  "organization": "NekoLab",
+  "version": "2.3.2",
+  "description": "Language support for Sumi templates.",
+  "icon": "Images/extension.png",
+  "categories": [
+    "languages",
+    "completions",
+    "formatters",
+    "issues"
+  ],
+  "bugs": "https://github.com/NekoLabStudio/sumi/issues",
+  "repository": "https://github.com/NekoLabStudio/sumi",
+  "license": "MIT",
+  "min_runtime": "10.0",
+  "main": "main.js",
+  "activationEvents": [
+    "onLanguage:sumi",
+    "onWorkspaceContains:sumi.json",
+    "onCommand:sumi.restartLanguageServer",
+    "onCommand:sumi.checkTheme"
+  ],
+  "entitlements": {
+    "process": true,
+    "filesystem": "readonly"
+  },
+  "config": {
+    "sumi.toolPath": {
+      "title": "Sumi Tool Path",
+      "type": "string",
+      "default": "",
+      "description": "Path to the sumi command. Leave empty to use ./sumi in the workspace, then sumi on PATH."
+    }
+  },
+  "commands": {
+    "extensions": [
+      {
+        "title": "Restart Language Server",
+        "command": "sumi.restartLanguageServer"
+      },
+      {
+        "title": "Check Templates",
+        "command": "sumi.checkTheme"
+      },
+      { "title": "Dev Server", "command": "sumi.dev" },
+      { "title": "Build", "command": "sumi.build" },
+      { "title": "Deploy", "command": "sumi.deploy" },
+      { "title": "Migrate", "command": "sumi.migrate" },
+      { "title": "Doctor", "command": "sumi.doctor" }
+    ]
+  }
+}

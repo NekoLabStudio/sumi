@@ -1,23 +1,23 @@
 #!/bin/sh
 set -eu
 
-REPOSITORY="${INKSTEAD_WRITER_REPOSITORY:-ivonunes/inkstead-writer}"
-INSTALL_DIR="${INKSTEAD_WRITER_INSTALL_DIR:-/usr/local/bin}"
-VERSION="${INKSTEAD_WRITER_VERSION:-latest}"
-BIN_NAME="inkstead-writer"
+REPOSITORY="${SUMI_REPOSITORY:-NekoLabStudio/sumi}"
+INSTALL_DIR="${SUMI_INSTALL_DIR:-/usr/local/bin}"
+VERSION="${SUMI_VERSION:-latest}"
+BIN_NAME="sumi"
 
 usage() {
   cat <<'EOF'
-Inkstead Writer installer
+Sumi installer
 
 Usage:
-  curl -fsSL https://install.inkstead.app | sh
-  curl -fsSL https://install.inkstead.app | sh -s -- --dir "$HOME/.local/bin"
+  curl -fsSL https://oss.nekolab.studio/sumi/install.sh | sh
+  curl -fsSL https://oss.nekolab.studio/sumi/install.sh | sh -s -- --dir "$HOME/.local/bin"
 
 Options:
   --dir DIR          Install directory. Defaults to /usr/local/bin.
-  --version VERSION  Install launcher from a specific Inkstead Writer release.
-  --repository REPO  GitHub repository. Defaults to ivonunes/inkstead-writer.
+  --version VERSION  Install launcher from a specific Sumi release.
+  --repository REPO  GitHub repository. Defaults to NekoLabStudio/sumi.
   --help             Show this help.
 EOF
 }
@@ -69,7 +69,7 @@ fetch_to_file() {
   elif command -v wget >/dev/null 2>&1; then
     wget -qO "$OUTPUT" "$URL"
   else
-    echo "curl or wget is required to install Inkstead Writer." >&2
+    echo "curl or wget is required to install Sumi." >&2
     exit 1
   fi
 }
@@ -81,7 +81,7 @@ fetch_stdout() {
   elif command -v wget >/dev/null 2>&1; then
     wget -qO - "$URL"
   else
-    echo "curl or wget is required to install Inkstead Writer." >&2
+    echo "curl or wget is required to install Sumi." >&2
     exit 1
   fi
 }
@@ -91,7 +91,7 @@ latest_version() {
   TAG="$(printf '%s\n' "$JSON" | sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
   TAG="${TAG#v}"
   if [ -z "$TAG" ]; then
-    echo "Could not determine latest Inkstead Writer release." >&2
+    echo "Could not determine latest Sumi release." >&2
     exit 1
   fi
   printf '%s\n' "$TAG"
@@ -100,10 +100,10 @@ latest_version() {
 checksum_for_asset() {
   VERSION="$1"
   ASSET="$2"
-  SUMS_URL="https://github.com/$REPOSITORY/releases/download/v$VERSION/inkstead-writer-v$VERSION-SHA256SUMS"
+  SUMS_URL="https://github.com/$REPOSITORY/releases/download/v$VERSION/sumi-v$VERSION-SHA256SUMS"
   CHECKSUM="$(fetch_stdout "$SUMS_URL" | awk -v asset="$ASSET" '$2 == asset { print $1; exit }')"
   if [ -z "$CHECKSUM" ]; then
-    echo "Could not find checksum for $ASSET in Inkstead Writer $VERSION." >&2
+    echo "Could not find checksum for $ASSET in Sumi $VERSION." >&2
     exit 1
   fi
   printf '%s\n' "$CHECKSUM"
@@ -117,7 +117,7 @@ verify_checksum() {
   elif command -v sha256sum >/dev/null 2>&1; then
     ACTUAL="$(sha256sum "$FILE" | awk '{ print $1 }')"
   else
-    echo "shasum or sha256sum is required to verify Inkstead Writer downloads." >&2
+    echo "shasum or sha256sum is required to verify Sumi downloads." >&2
     exit 1
   fi
 
@@ -164,7 +164,7 @@ if [ "$VERSION" = "latest" ]; then
 fi
 
 TMPDIR_ROOT="${TMPDIR:-/tmp}"
-TMPDIR_PATH="$(mktemp -d "$TMPDIR_ROOT/inkstead-writer-install.XXXXXX")"
+TMPDIR_PATH="$(mktemp -d "$TMPDIR_ROOT/sumi-install.XXXXXX")"
 cleanup() {
   rm -rf "$TMPDIR_PATH"
 }
@@ -174,7 +174,7 @@ ASSET="$BIN_NAME-v$VERSION"
 LAUNCHER="$TMPDIR_PATH/$BIN_NAME"
 ASSET_URL="https://github.com/$REPOSITORY/releases/download/v$VERSION/$ASSET"
 
-echo "Downloading Inkstead Writer launcher $VERSION..." >&2
+echo "Downloading Sumi launcher $VERSION..." >&2
 fetch_to_file "$ASSET_URL" "$LAUNCHER"
 verify_checksum "$LAUNCHER" "$(checksum_for_asset "$VERSION" "$ASSET")"
 chmod +x "$LAUNCHER"
@@ -182,8 +182,8 @@ chmod +x "$LAUNCHER"
 install_file "$LAUNCHER" "$INSTALL_DIR/$BIN_NAME"
 
 cat <<EOF
-Installed Inkstead Writer launcher $VERSION to $INSTALL_DIR/$BIN_NAME.
+Installed Sumi launcher $VERSION to $INSTALL_DIR/$BIN_NAME.
 
 Create a site:
-  inkstead-writer init my-site
+  sumi init my-site
 EOF

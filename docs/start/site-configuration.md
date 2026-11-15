@@ -1,23 +1,23 @@
 # Site Configuration
 
-Most site settings live in one file, `inkstead-writer.json`, at the root of your site. `inkstead-writer init` creates a working file for you, and you edit it as your site grows. This page walks through each section of the file.
+Most site settings live in one file, `sumi.json`, at the root of your site. `sumi init` creates a working file for you, and you edit it as your site grows. This page walks through each section of the file.
 
 In this guide you will learn:
 
 - where your site's title, author and timezone live
 - how to change the content folders and build output
 - how to adjust URLs, Markdown, feeds and media handling
-- how to point Inkstead Writer at a custom theme and external data
+- how to point Sumi at a custom theme and external data
 
 After changing configuration, check that everything still fits together:
 
 ```bash
-./inkstead-writer doctor
+./sumi doctor
 ```
 
 `doctor` reports anything the change broke; see [what doctor checks](commands.md#what-doctor-checks) for the full list.
 
-The file starts with a `$schema` key pointing at `https://inkstead.app/writer/schema/inkstead-writer.json`. Editors that understand JSON Schema use it to check the file and suggest keys as you type. `init` writes it for you, and `migrate` adds it to older sites.
+The file starts with a `$schema` key pointing at `https://oss.nekolab.studio/sumi/schema/sumi.json`. Editors that understand JSON Schema use it to check the file and suggest keys as you type. `init` writes it for you, and `migrate` adds it to older sites.
 
 ## Site details
 
@@ -42,7 +42,7 @@ Optional fields include `lang`, `timezone`, `email`, `avatar`, `bio`, `navigatio
 
 ## Content folders
 
-Inkstead Writer looks for your writing in these folders by default:
+Sumi looks for your writing in these folders by default:
 
 ```json
 {
@@ -71,7 +71,7 @@ By default, builds are written to `dist`:
 }
 ```
 
-If you change the output directory, run `./inkstead-writer migrate` or update generated CI files so they publish the same folder.
+If you change the output directory, run `./sumi migrate` or update generated CI files so they publish the same folder.
 
 ## URLs, Markdown and feeds
 
@@ -124,7 +124,7 @@ Feeds can also be limited:
 
 ## Media
 
-During builds, Inkstead Writer keeps your original files unchanged and optimises the copied output:
+During builds, Sumi keeps your original files unchanged and optimises the copied output:
 
 ```json
 {
@@ -146,13 +146,12 @@ The default theme is built in. To use a custom theme folder:
 ```json
 {
   "theme": {
-    "path": "theme",
-    "showPoweredBy": true
+    "path": "theme"
   }
 }
 ```
 
-For static files that should be copied without Plume processing, use passthrough assets:
+For static files that should be copied without Sumi processing, use passthrough assets:
 
 ```json
 {
@@ -197,9 +196,9 @@ Remote data sources must return JSON. Local files are resolved relative to the s
 
 ## Publishing and app setup
 
-Publishing, CI, syndication and app connection settings also live in `inkstead-writer.json`, but their setup depends on the provider:
+Publishing, CI, syndication and Inkstead app settings also live in `sumi.json`, but their setup depends on the provider:
 
 - [Deployment](../deployment/index.md)
 - [Continuous Integration](../ci/index.md)
 - [Syndication](../syndication/index.md)
-- [App Connection](../extras/app-connection.md)
+- [Inkstead app](../extras/app-connection.md)
