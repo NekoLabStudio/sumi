@@ -2,7 +2,7 @@
   "name": "sumi",
   "displayName": "Sumi",
   "description": "Sumi template language support, plus Sumi site commands (dev, build, deploy, migrate, doctor).",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "publisher": "nekolabstudio",
   "license": "MIT",
   "icon": "icon.png",
