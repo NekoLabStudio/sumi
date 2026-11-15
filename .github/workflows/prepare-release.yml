@@ -22,6 +22,12 @@ name: Prepare release
 # branch policy restricts it to runs on main. Deploy-key pushes are not
 # GITHUB_TOKEN events, so the tag push triggers the Release workflow directly;
 # no dispatch is needed.
+#
+# Anyone with write access can start a release, but nothing is pushed until a
+# member of the sumi team approves the Approve release job. Its
+# `release-approval` environment has the team as required reviewers and holds
+# no secrets, so the scheduled vendored update, which also uses `release`,
+# never waits for an approval.
 
 on:
   workflow_dispatch:
@@ -67,9 +73,19 @@ jobs:
       - name: Test
         run: swift test
 
+  approve:
+    name: Approve release
+    runs-on: ubuntu-latest
+    environment: release-approval
+    steps:
+      - name: Approved
+        run: echo "Release ${{ inputs.version }} approved."
+
   tag:
     name: Bump, tag and push
-    needs: test
+    needs:
+      - test
+      - approve
     runs-on: ubuntu-latest
     environment: release
     steps:
