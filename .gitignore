@@ -1,9 +1,9 @@
 node_modules/
 .build/
 dist/
-docs-site/
-plume/
 .env
 .env.*
 !.env.example
 .DS_Store
+*.vsix
+editors/nova/Sumi.novaextension/Syntaxes/libtree-sitter-sumi.dylib

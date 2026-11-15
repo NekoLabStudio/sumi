@@ -1,0 +1,180 @@
+# Components
+
+Components keep repeated markup in one place without hiding the HTML shape of the page. You define a component once with `@component`, then call it by name wherever you need it. Content flows in through arguments and slots, and Sumi checks every call against the definition.
+
+## Defining components
+
+Component names use PascalCase. Define a component with `@component`, then call it with `@` and its name:
+
+```sumi
+@component PostCard(post, tone = "default") {
+  <article class="post-card" class+="{tone}" class+="{post.kind}">
+    <h2>{post.title}</h2>
+    @slot
+  </article>
+}
+
+@PostCard(post, tone: "featured") {
+  <p>{post.excerpt}</p>
+}
+```
+
+Arguments can be positional, named or mixed. Named arguments are clearer once a component accepts more than one optional value.
+
+## Default values
+
+Parameters can have default values, so callers only mention what differs:
+
+```sumi
+@component Button(label, variant = "plain") {
+  <button class+="{variant}">{label}</button>
+}
+
+@Button("Save")
+@Button("Delete", variant: "danger")
+```
+
+## Slots
+
+Sometimes a caller needs to pass markup, not just values. `@slot` renders the trailing content passed to a component:
+
+```sumi
+@component Panel(title) {
+  <section>
+    <h2>{title}</h2>
+    <div>@slot</div>
+  </section>
+}
+
+@Panel("Now") {
+  <p>Working on Sumi.</p>
+}
+```
+
+### Fallback content
+
+Slots can include fallback content:
+
+```sumi
+@component EmptyState(title) {
+  <section class="empty-state">
+    @slot {
+      <p>{title}</p>
+    }
+  </section>
+}
+```
+
+The fallback renders only when the caller does not pass trailing content.
+
+### Named slots
+
+Use named slots when a component has multiple content areas:
+
+```sumi
+@component PageSection(title) {
+  <section>
+    <header>
+      @slot("header") {
+        <h2>{title}</h2>
+      }
+    </header>
+
+    <div>@slot</div>
+
+    <footer>
+      @slot(name: "footer")
+    </footer>
+  </section>
+}
+
+@PageSection("Projects") {
+  @content(header) {
+    <h1>Selected Work</h1>
+  }
+
+  <p>Project list...</p>
+
+  @content(footer) {
+    <a href="/projects/">All projects</a>
+  }
+}
+```
+
+`@content` is only valid directly inside a component call. This keeps the ownership of named slots clear.
+
+## Composition
+
+Components can call other components:
+
+```sumi
+@component PostList(posts) {
+  <ul class="post-list">
+    @for post in posts {
+      @PostCard(post)
+    }
+  </ul>
+}
+```
+
+Keep components focused. A component that owns layout, data selection, styling and interaction all at once is harder to reuse than a component with one clear job.
+
+## Designing component APIs
+
+Keep the first argument the thing the component renders, then make options named:
+
+```sumi
+@PostCard(post, tone: "featured", showMeta: false)
+```
+
+This keeps call sites readable as components grow. Use defaults for options that should usually disappear from the call site.
+
+Prefer slots for real content and arguments for data or small display options. If a caller needs to pass headings, paragraphs, lists or buttons, a slot usually reads better than a long string argument.
+
+## Resources
+
+Components can carry the styles and scripts they need:
+
+```sumi
+@component Disclosure(title) {
+  @style(scoped) {
+    .panel {
+      border: 1px solid currentColor;
+    }
+  }
+
+  @state open = false
+
+  <section class="panel" class:open="{open}">
+    <button on:click="{open.toggle()}" aria-expanded="{open}">{title}</button>
+    <div hidden?="{!open}">@slot</div>
+  </section>
+}
+```
+
+Scoped styles are limited to the rendered component fragment. State and event bindings make the component interactive through the Sumi runtime.
+
+See [Resources](resources.md) for how Sumi emits styles and scripts, and [Behaviour](behaviour.md) for `@state` and event bindings.
+
+## Error checking
+
+Sumi checks component calls against their definitions. Unknown arguments and duplicate arguments are reported as template errors:
+
+```sumi
+@PostCard(post, tone: "featured", tone: "quiet")
+```
+
+That makes component APIs safer to evolve than loose includes or partials.
+
+Sumi also guards against runaway recursion. A component that calls itself, directly or through other components, is reported as a template error past a depth limit instead of hanging the render.
+
+## Loading components
+
+Sumi loads components from the `components` folder of your theme:
+
+```txt
+theme/
+  components/
+    PostCard.sumi
+    PageSection.sumi
+```

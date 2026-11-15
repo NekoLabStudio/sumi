@@ -1,10 +1,10 @@
 # Syndication
 
-When you publish a post, Inkstead Writer can also share it to your social media accounts. This is called syndication: your website stays the post's home, and the social copies link back to it. Syndication is optional, and each post chooses whether to take part.
+When you publish a post, Sumi can also share it to your social media accounts. This is called syndication: your website stays the post's home, and the social copies link back to it. Syndication is optional, and each post chooses whether to take part.
 
 ## Enabling providers
 
-Choose services during `inkstead-writer init`, or add them later to `inkstead-writer.json`. The site-level configuration lists the enabled providers:
+Choose services during `sumi init`, or add them later to `sumi.json`. The site-level configuration lists the enabled providers:
 
 ```json
 {
@@ -33,13 +33,13 @@ When you publish, the post goes to every provider in its list.
 
 Titled posts go out as the title plus a link to the post on your site. Untitled notes go out as native social posts made from their text. Untitled photo notes go out as native social posts with the photos attached, when the chosen service supports media uploads.
 
-When a service has image size or dimension limits, Inkstead Writer prepares temporary optimised copies of a photo note's images to fit. Your original files stay unchanged.
+When a service has image size or dimension limits, Sumi prepares temporary optimised copies of a photo note's images to fit. Your original files stay unchanged.
 
-`./inkstead-writer publish` deploys the site before syndication runs; see [what publishing does](../deployment/index.md#what-publishing-does) for the full order.
+`./sumi publish` deploys the site before syndication runs; see [what publishing does](../deployment/index.md#what-publishing-does) for the full order.
 
 ## How results are recorded
 
-After each attempt, Inkstead Writer writes the result back into the post's frontmatter under `syndication`, so the post itself records what happened. A successful target looks like this:
+After each attempt, Sumi writes the result back into the post's frontmatter under `syndication`, so the post itself records what happened. A successful target looks like this:
 
 ```yaml
 syndication:

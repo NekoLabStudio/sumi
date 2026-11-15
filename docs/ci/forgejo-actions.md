@@ -2,10 +2,10 @@
 
 Forgejo is a self-hosted git service, and Forgejo Actions is its CI. If your site lives on a Forgejo instance, the generated workflow publishes it every time you push, so a finished post goes live on its own.
 
-Inkstead Writer can generate a `.forgejo/workflows/publish.yml` workflow during `inkstead-writer init`. The workflow runs when you push. It checks out the repository and runs:
+Sumi can generate a `.forgejo/workflows/publish.yml` workflow during `sumi init`. The workflow runs when you push. It checks out the repository and runs:
 
 ```bash
-./inkstead-writer publish
+./sumi publish
 ```
 
 ## Setting up secrets
@@ -13,7 +13,7 @@ Inkstead Writer can generate a `.forgejo/workflows/publish.yml` workflow during 
 To see which secrets your site needs, run:
 
 ```bash
-./inkstead-writer requirements
+./sumi requirements
 ```
 
 Add the listed environment variable names as Forgejo Actions secrets. The exact list depends on your publishing and syndication setup.

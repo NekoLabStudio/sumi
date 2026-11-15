@@ -1,0 +1,186 @@
+import XCTest
+import SumiLanguage
+
+final class SumiCSSScoperTests: XCTestCase {
+    let attribute = "data-sumi-scope-sumi-0123456789abcdef"
+
+    func testScopesSimpleRule() {
+        let output = SumiCSSScoper.scope(".card { display: grid; }", attribute: attribute)
+        XCTAssertEqual(output, ".card[\(attribute)] { display: grid; }")
+    }
+
+    func testScopesKeyCompoundNotAnAncestorWithPseudoClass() {
+        // The scope must land on the subject (last compound), not on an ancestor that
+        // happens to carry a pseudo-class before a combinator.
+        XCTAssertEqual(
+            SumiCSSScoper.scope(".menu:hover .item { color: red; }", attribute: attribute),
+            ".menu:hover .item[\(attribute)] { color: red; }")
+        XCTAssertEqual(
+            SumiCSSScoper.scope(":root .card { color: red; }", attribute: attribute),
+            ":root .card[\(attribute)] { color: red; }")
+        XCTAssertEqual(
+            SumiCSSScoper.scope("a:hover + b { color: red; }", attribute: attribute),
+            "a:hover + b[\(attribute)] { color: red; }")
+    }
+
+    func testCommentInSelectorDoesNotMisSplitOrMisScope() {
+        // A `,` or `:` inside a selector comment must not split or misplace the scope,
+        // and the comment is preserved.
+        XCTAssertEqual(
+            SumiCSSScoper.scope(".a, /* a,b */ .b { color: red; }", attribute: attribute),
+            ".a[\(attribute)], /* a,b */ .b[\(attribute)] { color: red; }")
+        XCTAssertEqual(
+            SumiCSSScoper.scope(".a /* : */ .b { color: red; }", attribute: attribute),
+            ".a /* : */ .b[\(attribute)] { color: red; }")
+    }
+
+    func testEscapedQuoteInAttributeSelectorDoesNotSplit() {
+        XCTAssertEqual(
+            SumiCSSScoper.scope(#"a[title="x\",y"] { color: red; }"#, attribute: attribute),
+            #"a[title="x\",y"][\#(attribute)] { color: red; }"#)
+    }
+
+    func testScopesLastCompoundOfDescendantSelectors() {
+        let output = SumiCSSScoper.scope(".card img { opacity: 0.8; }", attribute: attribute)
+        XCTAssertEqual(output, ".card img[\(attribute)] { opacity: 0.8; }")
+    }
+
+    func testScopesSelectorLists() {
+        let output = SumiCSSScoper.scope("h1, .title a { color: red; }", attribute: attribute)
+        XCTAssertEqual(output, "h1[\(attribute)], .title a[\(attribute)] { color: red; }")
+    }
+
+    func testInsertsAttributeBeforePseudoClasses() {
+        let output = SumiCSSScoper.scope(".card img:hover { opacity: 0.8; }", attribute: attribute)
+        XCTAssertEqual(output, ".card img[\(attribute)]:hover { opacity: 0.8; }")
+    }
+
+    func testInsertsAttributeBeforeLeadingPseudoClass() {
+        let output = SumiCSSScoper.scope(":root { --x: 1; }", attribute: attribute)
+        XCTAssertEqual(output, "[\(attribute)]:root { --x: 1; }")
+    }
+
+    func testInsertsAttributeBeforePseudoElements() {
+        let output = SumiCSSScoper.scope(#".card::before { content: ","; }"#, attribute: attribute)
+        XCTAssertEqual(output, #".card[\#(attribute)]::before { content: ","; }"#)
+    }
+
+    func testInsertsAttributeBeforePseudoClassAndPseudoElement() {
+        let output = SumiCSSScoper.scope("a:hover::after { content: \"\"; }", attribute: attribute)
+        XCTAssertEqual(output, "a[\(attribute)]:hover::after { content: \"\"; }")
+    }
+
+    func testKeepsFunctionalPseudoClassArgumentsIntact() {
+        let output = SumiCSSScoper.scope(".x:not(.a, .b) { color: red; }", attribute: attribute)
+        XCTAssertEqual(output, ".x[\(attribute)]:not(.a, .b) { color: red; }")
+    }
+
+    func testAppendsAfterAttributeSelectors() {
+        let output = SumiCSSScoper.scope(#"a[href^="https"] { color: blue; }"#, attribute: attribute)
+        XCTAssertEqual(output, #"a[href^="https"][\#(attribute)] { color: blue; }"#)
+    }
+
+    func testDoesNotSplitOnCommasInsideAttributeSelectorsOrQuotes() {
+        let output = SumiCSSScoper.scope(#"a[title="a,b"] { color: blue; }"#, attribute: attribute)
+        XCTAssertEqual(output, #"a[title="a,b"][\#(attribute)] { color: blue; }"#)
+    }
+
+    func testScopesRulesInsideMediaQueries() {
+        let css = """
+        @media (min-width: 40rem) {
+          .card { grid-template-columns: 1fr 1fr; }
+        }
+        """
+        let output = SumiCSSScoper.scope(css, attribute: attribute)
+        XCTAssertTrue(output.contains("@media (min-width: 40rem)"))
+        XCTAssertTrue(output.contains(".card[\(attribute)] { grid-template-columns: 1fr 1fr; }"))
+    }
+
+    func testScopesRulesInsideSupportsContainerAndLayer() {
+        let css = """
+        @supports (display: grid) {
+          .a { display: grid; }
+        }
+        @container (min-width: 10rem) {
+          .b { color: red; }
+        }
+        @layer theme {
+          .c { color: blue; }
+        }
+        """
+        let output = SumiCSSScoper.scope(css, attribute: attribute)
+        XCTAssertTrue(output.contains(".a[\(attribute)] { display: grid; }"))
+        XCTAssertTrue(output.contains(".b[\(attribute)] { color: red; }"))
+        XCTAssertTrue(output.contains(".c[\(attribute)] { color: blue; }"))
+    }
+
+    func testLeavesKeyframesUntouched() {
+        let css = """
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        """
+        XCTAssertEqual(SumiCSSScoper.scope(css, attribute: attribute), css)
+    }
+
+    func testLeavesFontFaceUntouched() {
+        let css = """
+        @font-face {
+          font-family: "Sumi Sans";
+          src: url("sumi-sans.woff2");
+        }
+        """
+        XCTAssertEqual(SumiCSSScoper.scope(css, attribute: attribute), css)
+    }
+
+    func testLeavesStandaloneImportIntact() {
+        let css = "@import url(\"theme.css\");\n"
+        XCTAssertEqual(SumiCSSScoper.scope(css, attribute: attribute), css)
+    }
+
+    func testLeavesCommentsIntact() {
+        let output = SumiCSSScoper.scope("/* heading */ .card { color: red; }", attribute: attribute)
+        XCTAssertEqual(output, "/* heading */ .card[\(attribute)] { color: red; }")
+    }
+
+    func testIgnoresBracesInsideComments() {
+        let output = SumiCSSScoper.scope("/* { } */ .a { color: red; }", attribute: attribute)
+        XCTAssertEqual(output, "/* { } */ .a[\(attribute)] { color: red; }")
+    }
+
+    func testPreservesDeclarationsAndTrailingTextVerbatim() {
+        let css = ".a { color: red; background: url(\"a{b}.png\"); }\n"
+        let output = SumiCSSScoper.scope(css, attribute: attribute)
+        XCTAssertEqual(output, ".a[\(attribute)] { color: red; background: url(\"a{b}.png\"); }\n")
+    }
+
+    func testScopedComponentStylesheetMatchesRendererScopeAttribute() throws {
+        // End-to-end parity with the renderer: scope a component stylesheet
+        // with the exact attribute the renderer adds to the markup.
+        let template = try SumiTemplate("""
+        @style(scoped: true) {
+          .card { display: grid; }
+          .card img:hover { opacity: 0.8; }
+          @media (min-width: 40rem) {
+            .card { grid-template-columns: 1fr 1fr; }
+          }
+        }
+        <article class="card"><img src="/photo.jpg" alt=""></article>
+        """, sourceName: "components/Card.sumi")
+
+        let result = try template.renderResult([:])
+        let style = try XCTUnwrap(result.styles.first)
+        XCTAssertTrue(style.scoped)
+        let scopeAttribute = try XCTUnwrap(style.scopeAttribute)
+        XCTAssertTrue(scopeAttribute.hasPrefix("data-sumi-scope-sumi-"))
+        XCTAssertTrue(result.html.contains(scopeAttribute))
+
+        let css = try XCTUnwrap(style.css)
+        let scoped = SumiCSSScoper.scope(css, attribute: scopeAttribute)
+        XCTAssertTrue(scoped.contains(".card[\(scopeAttribute)]"))
+        XCTAssertTrue(scoped.contains("img[\(scopeAttribute)]:hover"))
+        XCTAssertTrue(scoped.contains("@media (min-width: 40rem)"))
+        XCTAssertFalse(scoped.contains("grid-template-columns: 1fr 1fr;[\(scopeAttribute)]"))
+    }
+}

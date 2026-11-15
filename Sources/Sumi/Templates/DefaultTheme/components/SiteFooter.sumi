@@ -1,0 +1,6 @@
+@component SiteFooter() {
+  <footer class="site-footer">
+    <p>&copy; {now.year} {site.author}</p>
+    <p><a href="#top">Top &uarr;</a></p>
+  </footer>
+}

@@ -1,13 +1,13 @@
 # Pixelfed
 
-Pixelfed is a photo sharing service, so Inkstead Writer sends only photo notes there. If you have a Pixelfed account, connecting takes two settings and a token you create once.
+Pixelfed is a photo sharing service, so Sumi sends only photo notes there. If you have a Pixelfed account, connecting takes two settings and a token you create once.
 
-Inkstead Writer reads two environment variables:
+Sumi reads two environment variables:
 
 | Variable | What it is |
 | --- | --- |
 | `PIXELFED_INSTANCE_URL` | The address of your instance |
-| `PIXELFED_ACCESS_TOKEN` | The token that lets Inkstead Writer post as you |
+| `PIXELFED_ACCESS_TOKEN` | The token that lets Sumi post as you |
 
 Set them in your site's `.env` file for local publishing, or as CI secrets or variables:
 
