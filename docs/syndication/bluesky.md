@@ -1,13 +1,13 @@
 # Bluesky
 
-If you have a Bluesky account, Inkstead Writer can post to it whenever you publish. Connecting takes two settings: who you are and an app password that lets Inkstead Writer post for you.
+If you have a Bluesky account, Sumi can post to it whenever you publish. Connecting takes two settings: who you are and an app password that lets Sumi post for you.
 
-Inkstead Writer reads two environment variables:
+Sumi reads two environment variables:
 
 | Variable | What it is |
 | --- | --- |
 | `BLUESKY_IDENTIFIER` | Usually your handle, such as `example.com` or `you.bsky.social` |
-| `BLUESKY_APP_PASSWORD` | An app password created for Inkstead Writer |
+| `BLUESKY_APP_PASSWORD` | An app password created for Sumi |
 
 Set them in your site's `.env` file for local publishing, or as CI secrets or variables.
 
@@ -17,7 +17,7 @@ Use an app password rather than your main account password. Create one in Bluesk
 
 ## What gets posted
 
-Bluesky posts are limited to 300 characters. When a titled post would run over, Inkstead Writer shortens the title and keeps the link to your site intact.
+Bluesky posts are limited to 300 characters. When a titled post would run over, Sumi shortens the title and keeps the link to your site intact.
 
 Photo notes embed up to four images.
 

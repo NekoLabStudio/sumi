@@ -5,7 +5,7 @@ When something is not working, start with the built-in checks, then jump to the 
 Run doctor first:
 
 ```bash
-./inkstead-writer doctor
+./sumi doctor
 ```
 
 It reports anything wrong with your setup; see [what doctor checks](../start/commands.md#what-doctor-checks) for the full list.
@@ -20,7 +20,7 @@ Check that the file is in `content/posts`, has a valid `date` and is not saved a
 
 ## Deployment fails
 
-Run `./inkstead-writer build` first. If the build works but publish fails, check the secrets your publishing target needs.
+Run `./sumi build` first. If the build works but publish fails, check the secrets your publishing target needs.
 
 ## Syndication reposts unexpectedly
 
@@ -34,14 +34,14 @@ A syndication failure never fails the publish or CI run.
 
 ## A date or URL is off by a day
 
-Set `site.timezone` in `inkstead-writer.json`. Timestamps without an explicit offset are treated as UTC, and the timezone decides which calendar day a post falls on. See [Site Configuration](../start/site-configuration.md).
+Set `site.timezone` in `sumi.json`. Timestamps without an explicit offset are treated as UTC, and the timezone decides which calendar day a post falls on. See [Site Configuration](../start/site-configuration.md).
 
 ## Cache folders
 
-Downloaded binaries and the media optimisation cache live in `~/Library/Caches/inkstead-writer` on macOS and `${XDG_CACHE_HOME:-$HOME/.cache}/inkstead-writer` on Linux.
+Downloaded binaries and the media optimisation cache live in `~/Library/Caches/sumi` on macOS and `${XDG_CACHE_HOME:-$HOME/.cache}/sumi` on Linux.
 
-`./inkstead-writer cache clean` prunes old binaries. The whole folder is also safe to delete; Inkstead Writer rebuilds it on the next run.
+`./sumi cache clean` prunes old binaries. The whole folder is also safe to delete; Sumi rebuilds it on the next run.
 
 ## Windows
 
-The built-in `./inkstead-writer dev` server currently runs only on macOS and Linux. On Windows, use `./inkstead-writer build` and serve the output directory with another local static server.
+The built-in `./sumi dev` server currently runs only on macOS and Linux. On Windows, use `./sumi build` and serve the output directory with another local static server.

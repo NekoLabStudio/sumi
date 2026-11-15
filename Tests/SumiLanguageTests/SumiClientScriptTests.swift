@@ -1,0 +1,214 @@
+import XCTest
+
+@testable import SumiLanguage
+
+/// Tests for the Sumi client-script compiler (the @script language seam):
+/// SumiClientScriptCompiler.compile / compileBrowserRuntime. Assertions are
+/// on key substrings of the emitted JavaScript, not byte-exact output.
+final class SumiClientScriptTests: XCTestCase {
+    func testCompilesDeclarationsEventsAndDomMethods() throws {
+        let js = try SumiClientScriptCompiler.compile("""
+        let menu = page.query("#menu")
+        var open = false
+        on "#toggle".click {
+          event.preventDefault()
+          open = !open
+          menu.toggleClass("is-open", when: open)
+          menu.setText(open ? "Close" : "Menu")
+        }
+        on page.scroll {
+          page.addClass("scrolled")
+        }
+        """, sourceName: "scripts/menu.sumi")
+
+        XCTAssertTrue(js.contains(##"const menu = document.querySelector("#menu");"##))
+        XCTAssertTrue(js.contains("let open = false;"))
+        XCTAssertTrue(js.contains(##"for (const element of document.querySelectorAll("#toggle")) {"##))
+        XCTAssertTrue(js.contains(#"element.addEventListener("click", function(event) {"#))
+        XCTAssertTrue(js.contains("event.preventDefault();"))
+        XCTAssertTrue(js.contains("open = !open;"))
+        XCTAssertTrue(js.contains(#"(menu)?.classList.toggle("is-open", !!(open));"#))
+        // Ternary expressions survive into the compiled output, parenthesized so the
+        // appended `?? ""` coercion applies to the whole expression.
+        XCTAssertTrue(js.contains(#"(menu).textContent = String((open ? "Close" : "Menu"#))
+        XCTAssertTrue(js.contains(#"window.addEventListener("scroll", function(event) {"#))
+        XCTAssertTrue(
+            js.contains(#"(document.documentElement)?.classList.add(...__sumiClasses("scrolled"));"#))
+        // The class helper is emitted exactly once, at the top.
+        XCTAssertTrue(js.hasPrefix("function __sumiClasses(value)"))
+        XCTAssertEqual(js.components(separatedBy: "function __sumiClasses").count, 2)
+    }
+
+    func testTokenRewritesDoNotTouchStringLiterals() throws {
+        let js = try SumiClientScriptCompiler.compile("""
+        let label = page.query("#label")
+        on "#go".click {
+          label.setText("Status: nil, page.width here")
+        }
+        """, sourceName: "scripts/s.sumi")
+        // The literal text must survive: `nil`→`null` / `page.width`→`window.innerWidth`
+        // rewrites apply to code, not string contents.
+        XCTAssertTrue(js.contains(#""Status: nil, page.width here""#))
+        XCTAssertFalse(js.contains("Status: null"))
+        XCTAssertFalse(js.contains("Status: nil, window.innerWidth"))
+    }
+
+    func testStringInterpolationBecomesTemplateLiteral() throws {
+        let js = try SumiClientScriptCompiler.compile("""
+        let label = page.query("#label")
+        var count = 0
+        on "#go".click {
+          label.setText("Count: \\(count) at \\(page.width)px")
+          label.setText("no interpolation")
+        }
+        """, sourceName: "scripts/s.sumi")
+        // \(expr) → ${expr}, and the interpolated expr is itself transformed (page.width).
+        XCTAssertTrue(js.contains("`Count: ${count} at ${window.innerWidth}px`"))
+        // A literal without interpolation keeps its quotes (no needless template literal).
+        XCTAssertTrue(js.contains(#""no interpolation""#))
+    }
+
+    func testCoercionParenthesizesLogicalExpressions() throws {
+        let js = try SumiClientScriptCompiler.compile("""
+        let label = page.query("#label")
+        var primary = ""
+        var fallback = "Untitled"
+        on "#refresh".click {
+          label.setText(primary || fallback)
+        }
+        """, sourceName: "scripts/label.sumi")
+
+        // `String(primary || fallback ?? "")` would be a JavaScript SyntaxError:
+        // mixing || with ?? requires parentheses.
+        XCTAssertTrue(js.contains(#"(label).textContent = String((primary || fallback) ?? "");"#))
+        XCTAssertFalse(js.contains(#"|| fallback ?? "#))
+    }
+
+    func testCompilesControlFlowLoopsAndElementMethods() throws {
+        let js = try SumiClientScriptCompiler.compile("""
+        let field = page.query("#email")
+        field.setAttribute("aria-invalid", "true")
+        field.setStyle("--outline", "red")
+        field.focus()
+        for item in page.queryAll(".card") {
+          if item.hidden {
+            item.removeClass("ready")
+          } else {
+            item.addClass("ready")
+          }
+        }
+        """, sourceName: "scripts/cards.sumi")
+
+        XCTAssertTrue(js.contains(#"if ((field)) (field).setAttribute("aria-invalid", String(("true") ?? ""));"#))
+        XCTAssertTrue(js.contains(#"(field)?.style.setProperty("--outline", String(("red") ?? ""));"#))
+        XCTAssertTrue(js.contains("(field)?.focus();"))
+        XCTAssertTrue(
+            js.contains(#"for (const item of Array.from(document.querySelectorAll(".card"))) {"#))
+        XCTAssertTrue(js.contains("if (item.hidden) {"))
+        XCTAssertTrue(js.contains("} else {"))
+        XCTAssertTrue(js.contains(#"(item)?.classList.remove(...__sumiClasses("ready"));"#))
+        XCTAssertTrue(js.contains(#"(item)?.classList.add(...__sumiClasses("ready"));"#))
+    }
+
+    func testCompilesExpressionFormsAndPageMethods() throws {
+        let js = try SumiClientScriptCompiler.compile("""
+        let items = page.queryAll(".item")
+        let width = page.width
+        let label = page.scrollY > 10 ? "far" : "near"
+        on page.ready {
+          page.scrollTo(selector: "#main", smooth: true)
+          page.scrollToTop(smooth: page.scrollY > 100)
+        }
+        on "input".input {
+          page.toggleClass("typing", when: event.value)
+        }
+        """, sourceName: "scripts/page.sumi")
+
+        XCTAssertTrue(js.contains(#"const items = Array.from(document.querySelectorAll(".item"));"#))
+        XCTAssertTrue(js.contains("const width = window.innerWidth;"))
+        XCTAssertTrue(js.contains(#"const label = window.scrollY > 10 ? "far" : "near";"#))
+        XCTAssertTrue(js.contains(#"document.addEventListener("DOMContentLoaded", function(event) {"#))
+        XCTAssertTrue(js.contains(
+            ##"document.querySelector("#main")?.scrollIntoView({ behavior: (true ? "smooth" : "auto"), block: "start", inline: "nearest" });"##))
+        XCTAssertTrue(js.contains(
+            #"window.scrollTo({ top: 0, behavior: (window.scrollY > 100 ? "smooth" : "auto") });"#))
+        XCTAssertTrue(js.contains(
+            #"(document.documentElement)?.classList.toggle("typing", !!(event?.target?.value));"#))
+    }
+
+    func testUnsupportedSyntaxProducesDiagnosticsNotCrashes() {
+        XCTAssertThrowsError(
+            try SumiClientScriptCompiler.compile("delete window.x", sourceName: "s.sumi")
+        ) { error in
+            XCTAssertTrue(
+                String(describing: error).contains("Unsupported Sumi script statement"))
+        }
+
+        XCTAssertThrowsError(
+            try SumiClientScriptCompiler.compile(#"console.log("hi")"#, sourceName: "s.sumi")
+        ) { error in
+            let message = String(describing: error)
+            XCTAssertTrue(message.contains("Unsupported Sumi script method log"))
+            XCTAssertTrue(message.contains("s.sumi:1:1"), "diagnostics carry source locations")
+        }
+
+        XCTAssertThrowsError(
+            try SumiClientScriptCompiler.compile("page.fly()", sourceName: "s.sumi")
+        ) { error in
+            XCTAssertTrue(String(describing: error).contains("Unsupported page method fly"))
+        }
+    }
+
+    func testMalformedBlocksAndDeclarationsProduceDiagnostics() {
+        let failures: [(source: String, message: String)] = [
+            ("on \".t\".click {", "Missing closing } in @script block"),
+            ("}", "Unexpected } in Sumi script"),
+            ("} else {", "Sumi script else can only follow an if block"),
+            ("let broken", "Sumi script let declarations need a value"),
+            ("if  {", "Sumi script if blocks need a condition"),
+            ("for thing {", "Sumi script for loops use"),
+            ("on toggle {", "Sumi script events use"),
+        ]
+        for failure in failures {
+            XCTAssertThrowsError(
+                try SumiClientScriptCompiler.compile(failure.source, sourceName: "s.sumi"),
+                "Expected \(failure.source) to throw"
+            ) { error in
+                XCTAssertTrue(
+                    String(describing: error).contains(failure.message),
+                    "Expected \(failure.source) to report \(failure.message), got \(error)")
+            }
+        }
+    }
+
+    func testTemplateDiagnosticsSurfaceClientScriptErrors() {
+        let diagnostics = SumiLanguageSupport.diagnostics(
+            for: """
+            <main>ok</main>
+            @script {
+              menu.fly()
+            }
+            """,
+            sourceName: "theme/home.sumi"
+        )
+
+        XCTAssertEqual(diagnostics.count, 1)
+        XCTAssertEqual(
+            diagnostics.first?.message.contains("Unsupported Sumi script method fly"), true)
+        let line = diagnostics.first?.line ?? 0
+        XCTAssertGreaterThan(line, 1, "embedded script errors are offset into the template")
+    }
+
+    func testBrowserRuntimeCompilationKeepsExpressionForms() throws {
+        let js = try SumiClientScriptCompiler.compileBrowserRuntime("""
+        func choose(flag) {
+          return flag ? "yes" : "no";
+        }
+        let result = choose(true);
+        """, sourceName: "runtime.sumi")
+
+        XCTAssertTrue(js.contains("function choose(flag) {"))
+        XCTAssertTrue(js.contains(#"return flag ? "yes" : "no";"#))
+        XCTAssertTrue(js.contains("let result = choose(true);"))
+    }
+}

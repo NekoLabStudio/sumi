@@ -1,32 +1,36 @@
-# Inkstead Writer
+# Sumi
 
-Inkstead Writer is an opinionated publishing engine for personal indie websites. Write in Markdown, build a static site, deploy anywhere, and optionally syndicate posts to social media.
+Sumi is an opinionated publishing engine for personal indie websites. Write in Markdown, build a static site, deploy anywhere, and optionally syndicate posts to social media.
 
-Inkstead Writer supports macOS and Linux.
+Sumi supports macOS and Linux.
 
 ## Get Started
 
-Install the `inkstead-writer` launcher, then create and preview a site:
+Install the `sumi` launcher. On macOS, use Homebrew:
 
 ```bash
-curl -fsSL https://install.inkstead.app | sh
-inkstead-writer init my-site
+brew install nekolabstudio/tap/sumi
+```
+
+On Linux, or without Homebrew, use the install script:
+
+```bash
+curl -fsSL https://oss.nekolab.studio/sumi/install.sh | sh
+```
+
+Then create and preview a site:
+
+```bash
+sumi init my-site
 cd my-site
-./inkstead-writer doctor
-./inkstead-writer dev
+./sumi doctor
+./sumi dev
 ```
 
-On macOS, you can also install with Homebrew:
+The full documentation is available at [oss.nekolab.studio/sumi](https://oss.nekolab.studio/sumi).
 
-```bash
-brew tap ivonunes/tap
-brew install inkstead-writer
-```
+Inside a site, use the generated `./sumi` command. It keeps that site on the Sumi version recorded in `sumi.json`. Use `sumi init --help` to see options for publishing, CI, syndication, and Inkstead app setup.
 
-The full documentation is available at [inkstead.app/writer](https://inkstead.app/writer).
+## Templates
 
-Inside a site, use the generated `./inkstead-writer` command. It keeps that site on the Inkstead Writer version recorded in `inkstead-writer.json`. Use `inkstead-writer init --help` to see options for publishing, CI, syndication, and app connection setup.
-
-## Plume
-
-Inkstead Writer themes are written in Plume, a templating language for building expressive websites. Plume brings HTML, styles, assets, and behaviour into one authoring model. Inkstead Writer includes Plume, so theme commands run through `./inkstead-writer theme ...` without a separate Plume install.
+Sumi themes are written in Sumi's own templating language, which brings HTML, styles, assets, and behaviour into one authoring model. Theme commands run through `./sumi theme ...`.

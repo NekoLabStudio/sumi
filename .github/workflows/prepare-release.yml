@@ -9,7 +9,7 @@ name: Prepare release
 #
 # The tag is created ON the release commit, so it is immutable and correct from
 # birth — release.yml refuses a tag that doesn't match currentVersion.
-# inkstead.app needs nothing per release: its build discovers upgrade-notes pages.
+# The docs site needs nothing per release: its build discovers upgrade-notes pages.
 #
 # Tests run in the Swift container; the git work runs in a separate job on the
 # plain runner, because checkout inside a container can fall back to a REST
@@ -100,7 +100,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "Release ${{ inputs.version }}"
-          git tag -a "v${{ inputs.version }}" -m "Inkstead Writer ${{ inputs.version }}"
+          git tag -a "v${{ inputs.version }}" -m "Sumi ${{ inputs.version }}"
           # main first, tag second: if the branch push is rejected (rules,
           # races), no tag is left behind pointing at an unreachable commit.
           # The tag push fires the Release workflow's tag trigger.

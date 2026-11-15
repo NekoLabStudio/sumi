@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<syntax name="sumi" xmlns="https://www.nova.app/syntax">
+    <meta>
+        <name>Sumi</name>
+        <type>markup</type>
+        <preferred-file-extension>sumi</preferred-file-extension>
+    </meta>
+
+    <detectors>
+        <extension priority="1.0">sumi</extension>
+    </detectors>
+
+    <tree-sitter>
+        <highlights />
+    </tree-sitter>
+</syntax>

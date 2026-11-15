@@ -25,10 +25,10 @@ Dates accept ISO 8601 timestamps or a plain date like `date: 2026-05-10`. Timest
 To create a post locally with the right filename and frontmatter:
 
 ```bash
-./inkstead-writer new post
+./sumi new post
 ```
 
-Inkstead Writer asks whether the post is a long article or a note. Articles get a `title` field and an empty body; notes use the text you enter as the body and omit `title`.
+Sumi asks whether the post is a long article or a note. Articles get a `title` field and an empty body; notes use the text you enter as the body and omit `title`.
 
 If [syndication](../syndication/index.md) is enabled for the site, new articles and notes include the enabled text-capable providers in `syndicate` by default. Photo-only providers are skipped for text posts.
 
@@ -36,13 +36,13 @@ The paths on this page use the default site structure. You can change the conten
 
 ## Articles, notes and photo notes
 
-You never declare a kind of post. Inkstead Writer infers it from the content:
+You never declare a kind of post. Sumi infers it from the content:
 
 - Posts with a `title` are articles.
 - Posts without a `title` are notes.
 - Untitled posts with images are photo notes.
 
-Inkstead Writer infers photo notes from Markdown or HTML images in the body.
+Sumi infers photo notes from Markdown or HTML images in the body.
 
 Pages live in `content/pages` and never syndicate.
 
@@ -98,9 +98,9 @@ Morning coffee.
 
 You can keep original files in the media folder and reference the public path you want your theme to render.
 
-During builds, Inkstead Writer copies the media folder to `/media/`. It resizes very large JPEG, PNG and WebP images to a reasonable web size and strips metadata from the copied files on macOS and Linux. Your originals are left unchanged. Passthrough assets are not optimised.
+During builds, Sumi copies the media folder to `/media/`. It resizes very large JPEG, PNG and WebP images to a reasonable web size and strips metadata from the copied files on macOS and Linux. Your originals are left unchanged. Passthrough assets are not optimised.
 
-You can tune or disable this in `inkstead-writer.json`:
+You can tune or disable this in `sumi.json`:
 
 ```json
 {
@@ -123,13 +123,13 @@ categories:
   - Travel
 ```
 
-When categories are present, Inkstead Writer generates paginated category indexes at `/categories/<category>/`, RSS feeds at `/categories/<category>/feed.xml` and JSON feeds at `/categories/<category>/feed.json`.
+When categories are present, Sumi generates paginated category indexes at `/categories/<category>/`, RSS feeds at `/categories/<category>/feed.xml` and JSON feeds at `/categories/<category>/feed.json`.
 
 Posts in nested folders under `content/posts` also receive categories from their directory names. For example, `content/posts/essays/my-post.md` is assigned to `Essays` even without category frontmatter. Posts directly inside `content/posts` only use frontmatter categories.
 
 ## Pagination
 
-Inkstead Writer paginates the homepage and category indexes automatically. By default, each index page shows 20 posts before creating pages like:
+Sumi paginates the homepage and category indexes automatically. By default, each index page shows 20 posts before creating pages like:
 
 ```txt
 /page/2/
@@ -156,7 +156,7 @@ Index pages show a short excerpt of each article rather than the whole post. You
 summary: A short custom introduction for index pages.
 ```
 
-Without `summary`, Inkstead Writer uses the content before `<!--more-->`:
+Without `summary`, Sumi uses the content before `<!--more-->`:
 
 ```md
 This appears on index pages.
@@ -168,7 +168,7 @@ This only appears on the post page.
 
 Themes can use `post.excerpt` and `post.hasMore`. `post.excerpt` is rendered HTML, so Markdown links and formatting work on index pages.
 
-If neither `summary` nor `<!--more-->` exists, Inkstead Writer creates a short excerpt from the post body automatically.
+If neither `summary` nor `<!--more-->` exists, Sumi creates a short excerpt from the post body automatically.
 
 ## Frontmatter reference
 
@@ -186,7 +186,7 @@ Posts understand these frontmatter fields. Everything except `date` is optional.
 | `photos` | Image paths to treat as the post's photos, in addition to images in the body. |
 | `alt` | Alt text for the post's primary image, available to themes as `post.alt`. |
 | `syndicate` | The providers this post should syndicate to. See [Syndication](../syndication/index.md). |
-| `syndication` | Written by Inkstead Writer after [syndication](../syndication/index.md), recording each provider's status and link. You normally never edit this. |
+| `syndication` | Written by Sumi after [syndication](../syndication/index.md), recording each provider's status and link. You normally never edit this. |
 
 Pages in `content/pages` use `title`, and collection items can carry any fields your templates want; see [Collections](#collections).
 

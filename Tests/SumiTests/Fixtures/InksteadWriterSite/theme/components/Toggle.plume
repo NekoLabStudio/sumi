@@ -1,0 +1,5 @@
+@component Toggle(label: String) {
+  @script "../scripts/site.js"
+  <button data-plume-track class="plume-progress-bar">{label}</button>
+  @comment { Rendered inside layouts/default.plume. }
+}

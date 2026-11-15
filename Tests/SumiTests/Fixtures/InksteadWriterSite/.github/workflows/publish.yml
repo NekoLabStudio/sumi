@@ -1,0 +1,58 @@
+name: Publish
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MASTODON_INSTANCE_URL: ${{ secrets.MASTODON_INSTANCE_URL }}
+      MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+      BLUESKY_IDENTIFIER: ${{ secrets.BLUESKY_IDENTIFIER }}
+      BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+      FLICKR_API_KEY: ${{ secrets.FLICKR_API_KEY }}
+      FLICKR_API_SECRET: ${{ secrets.FLICKR_API_SECRET }}
+      FLICKR_ACCESS_TOKEN: ${{ secrets.FLICKR_ACCESS_TOKEN }}
+      FLICKR_ACCESS_SECRET: ${{ secrets.FLICKR_ACCESS_SECRET }}
+      PIXELFED_INSTANCE_URL: ${{ secrets.PIXELFED_INSTANCE_URL }}
+      PIXELFED_ACCESS_TOKEN: ${{ secrets.PIXELFED_ACCESS_TOKEN }}
+      BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Read Inkstead Writer version
+        id: writer_version
+        run: |
+          version="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' inkstead-writer.json | head -n 1)"
+          if [ -z "$version" ]; then
+            echo "Could not read Inkstead Writer version from inkstead-writer.json." >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cache/inkstead-writer/v${{ steps.writer_version.outputs.version }}
+          key: inkstead-writer-bin-${{ runner.os }}-${{ steps.writer_version.outputs.version }}
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cache/inkstead-writer/media
+            ~/.cache/inkstead-writer/data
+          key: inkstead-writer-data-${{ runner.os }}-${{ hashFiles('inkstead-writer.json') }}
+          restore-keys: |
+            inkstead-writer-data-${{ runner.os }}-
+      - run: ./inkstead-writer publish
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/deploy-pages@v4
