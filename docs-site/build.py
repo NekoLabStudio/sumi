@@ -729,7 +729,7 @@ def brand_html() -> str:
           <source srcset="{ROOT}/static/sumi-dark.png" media="(prefers-color-scheme: dark)">
           <img src="{ROOT}/static/sumi.png" alt="" width="36" height="36">
         </picture>
-        <strong>Sumi</strong>
+        <strong>sumi</strong>
       </a>"""
 
 
