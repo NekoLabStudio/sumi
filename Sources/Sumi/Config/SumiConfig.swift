@@ -1,7 +1,7 @@
 import Foundation
 
 public enum SumiMetadata {
-    public static let currentVersion = "2.4.0"
+    public static let currentVersion = "2.4.1"
     public static let configFileName = "sumi.json"
     public static let executableName = "sumi"
     public static let cacheDirectoryName = "sumi"

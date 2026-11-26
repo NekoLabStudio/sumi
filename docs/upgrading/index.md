@@ -59,6 +59,7 @@ The cache defaults to `~/Library/Caches/sumi` on macOS and `${XDG_CACHE_HOME:-$H
 ## Versions
 
 <!-- newest-first: prepare-release.sh inserts each release's line below -->
+- [Sumi 2.4.1](/upgrading/2.4.1/)
 - [Sumi 2.4.0](/upgrading/2.4.0/)
 - [Inkstead Writer 2.3.2](/upgrading/2.3.2/)
 - [Inkstead Writer 2.3.1](/upgrading/2.3.1/)

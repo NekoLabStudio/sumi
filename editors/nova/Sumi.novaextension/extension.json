@@ -2,7 +2,7 @@
   "identifier": "studio.nekolab.sumi",
   "name": "Sumi",
   "organization": "NekoLab",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Language support for Sumi templates.",
   "icon": "Images/extension.png",
   "categories": [
