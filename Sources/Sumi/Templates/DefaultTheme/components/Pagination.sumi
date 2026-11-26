@@ -1,9 +1,9 @@
 @component Pagination(pagination) {
   @if pagination.total > 1 {
   <nav class="pagination" aria-label="Pagination">
-    @if pagination.previousUrl {<a href="{pagination.previousUrl}" aria-label="Newer posts">&larr;</a>} else {<span aria-hidden="true">&larr;</span>}
+    @if pagination.previousUrl {<a class="pagination-link" href="{pagination.previousUrl}" aria-label="Newer posts">&larr; Newer</a>} else {<span class="pagination-link is-disabled" aria-hidden="true">&larr; Newer</span>}
     <span class="pagination-status"><span aria-current="page">{pagination.current}</span><span>/</span><span>{pagination.total}</span></span>
-    @if pagination.nextUrl {<a href="{pagination.nextUrl}" aria-label="Older posts">&rarr;</a>} else {<span aria-hidden="true">&rarr;</span>}
+    @if pagination.nextUrl {<a class="pagination-link" href="{pagination.nextUrl}" aria-label="Older posts">Older &rarr;</a>} else {<span class="pagination-link is-disabled" aria-hidden="true">Older &rarr;</span>}
   </nav>
   }
 }

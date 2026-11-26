@@ -1,24 +1,37 @@
 @component PostCard(post, showAuthor = true, showReadMore = true) {
-  <li class="post-list-item h-entry" class:note-card="{!post.title}">
+  <li class="post-list-item h-entry" class:note-card="{!post.title}" class:photo-card="{post.photos.size > 0}">
     <div class="post-date">
       <a class="post-meta u-url" href="{post.urlPath}">
         <time class="dt-published" datetime="{post.dateIso}">{post.dateDisplay}</time>
       </a>
+      @if post.categories.size > 0 {
+      <span class="post-card-categories">@for category in post.categoryLinks {<a class="p-category" href="{category.url}">&#35;{category.name}</a>}</span>
+      }
     </div>
     <div class="post-body">
     @if post.title {
-    <a class="post-title u-url p-name" href="{post.urlPath}">{post.displayTitle}</a>
+    <h2 class="post-heading"><a class="post-title u-url p-name" href="{post.urlPath}">{post.displayTitle}</a></h2>
     @if showAuthor {<a class="p-author h-card" hidden href="/">{site.author}</a>}
+    @if post.photos.size > 0 {
+    <div class="photo-grid" data-count="{post.photos.size}">
+      @for photo in post.photos {<a class="photo-tile" href="{post.urlPath}">@image(photo, alt: post.alt | default(""), class: "u-photo")</a>}
+    </div>
+    }
     @if post.excerpt {
     <div class="p-summary">{post.excerpt}</div>
     @if showReadMore {
     @if post.hasMore {
-    <p class="read-more"><a href="{post.urlPath}">Continue reading &rarr;</a></p>
+    <p class="read-more"><a href="{post.urlPath}">Continue reading <span class="read-more-arrow" aria-hidden="true">&rarr;</span></a></p>
     }
     }
     }
     } else {
     <data class="p-name" value="{post.displayTitle}"></data>
+    @if post.photos.size > 0 {
+    <div class="photo-grid" data-count="{post.photos.size}">
+      @for photo in post.photos {<a class="photo-tile" href="{post.urlPath}">@image(photo, alt: post.alt | default(""), class: "u-photo")</a>}
+    </div>
+    }
     <div class="e-content">{post.html}</div>
     @if showAuthor {<a class="p-author h-card" hidden href="/">{site.author}</a>}
     }

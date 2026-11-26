@@ -1,6 +1,15 @@
 @component SiteFooter() {
-  <footer class="site-footer">
-    <p>&copy; {now.year} {site.author}</p>
-    <p><a href="#top">Top &uarr;</a></p>
-  </footer>
+  <div class="site-footer-wrap">
+    <footer class="site-footer">
+      <p class="site-footer-copy">&copy; {now.year} {site.author}</p>
+      <div class="site-footer-links">
+        @if site.social.size > 0 {
+        @for social in site.social {<a href="{social.url}">{social.name}</a>}
+        <span class="footer-sep" aria-hidden="true">&middot;</span>
+        }
+        <a href="/feed.json">JSON Feed</a>
+        <span class="footer-top"><a href="#top">Top &uarr;</a></span>
+      </div>
+    </footer>
+  </div>
 }
