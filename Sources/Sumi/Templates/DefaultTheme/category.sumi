@@ -1,3 +1,10 @@
-<h1>{title}</h1>
-@PostList(posts, showAuthor: false, showReadMore: false)
+<header class="archive-header">
+  <h1>{title}</h1>
+  <p class="archive-feeds">
+    <a href="{category.feedPath}">RSS</a>
+    <span aria-hidden="true">&middot;</span>
+    <a href="{category.jsonFeedPath}">JSON Feed</a>
+  </p>
+</header>
+@PostList(posts, showAuthor: false, showReadMore: true)
 @Pagination(pagination)

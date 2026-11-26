@@ -1,7 +1,27 @@
+@if site.description || site.bio || site.social.size > 0 {
 <section class="home-intro">
   @if site.description {
-  <p>{site.description}</p>
+  <p class="home-description">{site.description}</p>
+  }
+  @if site.bio {
+  <p class="home-bio">{site.bio}</p>
+  }
+  @if site.social.size > 0 {
+  <ul class="social-links" aria-label="Links">
+    @for social in site.social {
+    <li>@if social.relMe {<a href="{social.url}" rel="me">{social.name} <span aria-hidden="true">&nearr;</span></a>} else {<a href="{social.url}">{social.name} <span aria-hidden="true">&nearr;</span></a>}</li>
+    }
+  </ul>
   }
 </section>
+}
+@if categories.size > 0 {
+<nav class="topic-bar" aria-label="Categories">
+  <span class="topic-label">Topics</span>
+  <div class="topic-links">
+    @for category in categories {<a href="{category.urlPath}">&#35;{category.name}</a>}
+  </div>
+</nav>
+}
 @PostList(posts)
 @Pagination(pagination)

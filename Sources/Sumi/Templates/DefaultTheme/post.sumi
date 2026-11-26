@@ -1,10 +1,21 @@
 <article class="single-entry h-entry">
-  @if post.title {<h1 class="p-name">{post.title}</h1>} else {<data class="p-name" value="{post.displayTitle}"></data>}
-  <time class="muted dt-published" datetime="{post.dateIso}">{post.dateDisplay}</time>
+  <header class="entry-header">
+    <div class="entry-meta">
+      <time class="muted dt-published" datetime="{post.dateIso}">{post.dateDisplay}</time>
+    </div>
+    @if post.title {<h1 class="p-name">{post.title}</h1>} else {<data class="p-name" value="{post.displayTitle}"></data>}
+  </header>
   <a class="u-url u-uid" hidden href="{post.urlPath}">Permalink</a>
   <a class="p-author h-card" hidden href="/">{site.author}</a>
-  @for photo in post.photos {@image(photo, alt: post.alt | default(""), class: "u-photo")}
+  @if post.photos.size > 0 {
+  <div class="photo-grid entry-photos" data-count="{post.photos.size}">
+    @for photo in post.photos {<figure class="photo-tile">@image(photo, alt: post.alt | default(""), class: "u-photo")</figure>}
+  </div>
+  }
   <div class="e-content">{post.html}</div>
-  @Categories(post)
-  @SyndicationLinks(post)
+  <footer class="entry-footer">
+    @Categories(post)
+    @SyndicationLinks(post)
+    <p class="back-link"><a href="/">&larr; All posts</a></p>
+  </footer>
 </article>

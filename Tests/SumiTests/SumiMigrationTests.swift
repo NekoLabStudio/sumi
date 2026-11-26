@@ -32,6 +32,7 @@ final class SumiMigrationTests: XCTestCase {
 
     func testMovesAnInksteadWriterSiteToExactlyWhatAFreshSumiSiteLooksLike() throws {
         let site = try oldSite()
+        let original = try snapshot(site.url)
         _ = try SumiMigration.run(root: site.url)
 
         let fresh = try TemporaryDirectory()
@@ -41,7 +42,30 @@ final class SumiMigrationTests: XCTestCase {
         try FileManager.default.createDirectory(at: fresh.url.appendingPathComponent("theme/scripts"), withIntermediateDirectories: true)
         try Self.customScript.write(to: fresh.url.appendingPathComponent("theme/scripts/site.js"), atomically: true, encoding: .utf8)
 
-        XCTAssertEqual(try snapshot(site.url), try snapshot(fresh.url))
+        let migrated = try snapshot(site.url)
+        let freshSnapshot = try snapshot(fresh.url)
+        XCTAssertEqual(Set(migrated.keys), Set(freshSnapshot.keys))
+
+        // Stock SiteFooter and SiteStyles are refreshed to drop the removed footer credit,
+        // while other previously ejected templates stay intact after renaming .plume -> .sumi.
+        let preservedEjectedTemplates = Set(
+            original.keys
+                .filter { $0.hasPrefix("theme/") && $0.hasSuffix(".plume") }
+                .map { String($0.dropLast(".plume".count)) + ".sumi" }
+        ).subtracting([
+            "theme/components/SiteFooter.sumi",
+            "theme/components/SiteStyles.sumi",
+            "theme/components/Toggle.sumi"
+        ])
+
+        for path in migrated.keys.sorted() {
+            if preservedEjectedTemplates.contains(path) {
+                let originalPath = String(path.dropLast(".sumi".count)) + ".plume"
+                XCTAssertEqual(migrated[path], original[originalPath], "Expected \(path) to preserve its ejected template content")
+            } else {
+                XCTAssertEqual(migrated[path], freshSnapshot[path], "Expected \(path) to match a fresh Sumi site")
+            }
+        }
         XCTAssertTrue(FileManager.default.isExecutableFile(atPath: site.url.appendingPathComponent(SiteWrapper.path).path))
     }
 
